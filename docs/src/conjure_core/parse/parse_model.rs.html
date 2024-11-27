@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `crates/conjure_core/src/parse/parse_model.rs`."><title>parse_model.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-42caa33d.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="conjure_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.84.0-nightly (81eef2d36 2024-11-11)" data-channel="nightly" data-search-js="search-853ef39b.js" data-settings-js="settings-0f613d39.js" ><script src="../../../static.files/storage-59e33391.js"></script><script defer src="../../../static.files/src-script-56102188.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">conjure_core/parse/</div>parse_model.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `crates/conjure_core/src/parse/parse_model.rs`."><title>parse_model.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../../static.files/rustdoc-42caa33d.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="conjure_core" data-themes="" data-resource-suffix="" data-rustdoc-version="1.85.0-nightly (dff3e7ccd 2024-11-26)" data-channel="nightly" data-search-js="search-92e6798f.js" data-settings-js="settings-0f613d39.js" ><script src="../../../static.files/storage-59e33391.js"></script><script defer src="../../../static.files/src-script-56102188.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-5f194d8c.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-893ab5e7.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-044be391.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><h1><div class="sub-heading">conjure_core/parse/</div>parse_model.rs</h1><rustdoc-toolbar></rustdoc-toolbar></div><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers">
 <a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
@@ -392,13 +392,17 @@
 <a href="#391" id="391">391</a>
 <a href="#392" id="392">392</a>
 <a href="#393" id="393">393</a>
-<a href="#394" id="394">394</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+<a href="#394" id="394">394</a>
+<a href="#395" id="395">395</a>
+<a href="#396" id="396">396</a>
+<a href="#397" id="397">397</a>
+<a href="#398" id="398">398</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::sync::{Arc, RwLock};
 
 <span class="kw">use </span>serde_json::Value;
 <span class="kw">use </span>serde_json::Value <span class="kw">as </span>JsonValue;
 
-<span class="kw">use </span><span class="kw">crate</span>::ast::{DecisionVariable, Domain, Expression, Factor, Literal, Name, Range};
+<span class="kw">use </span><span class="kw">crate</span>::ast::{Atom, DecisionVariable, Domain, Expression, Literal, Name, Range};
 <span class="kw">use </span><span class="kw">crate</span>::bug;
 <span class="kw">use </span><span class="kw">crate</span>::context::Context;
 <span class="kw">use </span><span class="kw">crate</span>::error::{Error, <span class="prelude-ty">Result</span>};
@@ -587,6 +591,10 @@
             <span class="string">"MkOpDiv"</span>,
             Box::new(Expression::UnsafeDiv) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>Fn(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) -&gt; <span class="kw">_</span>&gt;,
         ),
+        (
+            <span class="string">"MkOpMod"</span>,
+            Box::new(Expression::UnsafeMod) <span class="kw">as </span>Box&lt;<span class="kw">dyn </span>Fn(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) -&gt; <span class="kw">_</span>&gt;,
+        ),
     ]
     .into_iter()
     .collect();
@@ -643,9 +651,9 @@
         },
         Value::Object(refe) <span class="kw">if </span>refe.contains_key(<span class="string">"Reference"</span>) =&gt; {
             <span class="kw">let </span>name = refe[<span class="string">"Reference"</span>].as_array()<span class="question-mark">?</span>[<span class="number">0</span>].as_object()<span class="question-mark">?</span>[<span class="string">"Name"</span>].as_str()<span class="question-mark">?</span>;
-            <span class="prelude-val">Some</span>(Expression::FactorE(
+            <span class="prelude-val">Some</span>(Expression::Atomic(
                 Metadata::new(),
-                Factor::Reference(Name::UserName(name.to_string())),
+                Atom::Reference(Name::UserName(name.to_string())),
             ))
         }
         Value::Object(constant) <span class="kw">if </span>constant.contains_key(<span class="string">"Constant"</span>) =&gt; parse_constant(constant),
@@ -746,17 +754,17 @@
                 }
             };
 
-            <span class="prelude-val">Some</span>(Expression::FactorE(
+            <span class="prelude-val">Some</span>(Expression::Atomic(
                 Metadata::new(),
-                Factor::Literal(Literal::Int(int_32)),
+                Atom::Literal(Literal::Int(int_32)),
             ))
         }
 
         <span class="prelude-val">Some</span>(Value::Object(b)) <span class="kw">if </span>b.contains_key(<span class="string">"ConstantBool"</span>) =&gt; {
-            <span class="kw">let </span>b: bool = b[<span class="string">"ConstantBool"</span>].as_bool().unwrap();
-            <span class="prelude-val">Some</span>(Expression::FactorE(
+            <span class="kw">let </span>b: bool = b[<span class="string">"ConstantBool"</span>].as_bool()<span class="question-mark">?</span>;
+            <span class="prelude-val">Some</span>(Expression::Atomic(
                 Metadata::new(),
-                Factor::Literal(Literal::Bool(b)),
+                Atom::Literal(Literal::Bool(b)),
             ))
         }
 
@@ -767,7 +775,7 @@
                 .as_array()
                 .and_then(|x| x[<span class="number">1</span>].as_i64())
                 .and_then(|x| x.try_into().ok())
-                .map(|x| Expression::FactorE(Metadata::new(), Factor::Literal(Literal::Int(x))));
+                .map(|x| Expression::Atomic(Metadata::new(), Atom::Literal(Literal::Int(x))));
 
             <span class="kw">if let </span>e @ <span class="prelude-val">Some</span>(<span class="kw">_</span>) = int_expr {
                 <span class="kw">return </span>e;
@@ -775,7 +783,7 @@
 
             <span class="kw">let </span>bool_expr = constant[<span class="string">"ConstantBool"</span>]
                 .as_bool()
-                .map(|x| Expression::FactorE(Metadata::new(), Factor::Literal(Literal::Bool(x))));
+                .map(|x| Expression::Atomic(Metadata::new(), Atom::Literal(Literal::Bool(x))));
 
             <span class="kw">if let </span>e @ <span class="prelude-val">Some</span>(<span class="kw">_</span>) = bool_expr {
                 <span class="kw">return </span>e;
