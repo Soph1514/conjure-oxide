@@ -11,7 +11,10 @@ use tracing::field::Field;
 use tracing::field::Visit;
 use tracing::Subscriber;
 use tracing::{span, Level};
-use tracing_subscriber::{filter::EnvFilter, fmt, fmt::FmtContext, layer::SubscriberExt, Registry};
+use tracing_subscriber::layer::Layered;
+use tracing_subscriber::{
+    filter::EnvFilter, fmt, fmt::FmtContext, layer::SubscriberExt, Layer, Registry,
+};
 
 use tracing_appender::non_blocking::WorkerGuard;
 
@@ -388,28 +391,55 @@ pub fn create_scoped_subscriber(
     path: &str,
     test_name: &str,
 ) -> (impl tracing::Subscriber + Send + Sync, WorkerGuard) {
-    let file = File::create(format!("{path}/{test_name}-generated-rule-trace.json"))
-        .expect("Unable to create log file");
-    let writer = BufWriter::new(file);
-    let (non_blocking, guard) = tracing_appender::non_blocking(writer);
+    // let file = File::create(format!("{path}/{test_name}-generated-rule-trace.json"))
+    //     .expect("Unable to create log file");
+    // let writer = BufWriter::new(file);
+    //let (non_blocking, guard) = tracing_appender::non_blocking(writer);
 
-    // subscriber setup with the JSON formatter
-    let subscriber = Registry::default()
-        .with(EnvFilter::new("rule_engine=trace"))
-        .with(
-            fmt::layer()
-                .with_writer(non_blocking)
-                .json()
-                .event_format(JsonFormatter),
-        );
+    let (target1_layer, guard1) = create_file_layer_json(path, test_name);
+    let (target2_layer, guard2) = create_file_layer_human(path, test_name);
+    let layered = target1_layer.and_then(target2_layer);
 
-    // wrapping the subscriber in an Arc to share across multiple threads
-    let subscriber = Arc::new(subscriber) as Arc<dyn tracing::Subscriber + Send + Sync>;
+    // Wrap the subscriber in an Arc for thread safety
+    let subscriber =
+        Arc::new(Registry::default().with(layered)) as Arc<dyn tracing::Subscriber + Send + Sync>;
 
     // setting this subscriber as the default
     let _default = tracing::subscriber::set_default(subscriber.clone());
 
-    (subscriber, guard)
+    (subscriber, guard1)
+}
+
+fn create_file_layer_json(
+    path: &str,
+    test_name: &str,
+) -> (impl Layer<Registry> + Send + Sync, WorkerGuard) {
+    let file = File::create(format!("{path}/{test_name}-generated-rule-trace.json"))
+        .expect("Unable to create log file");
+    let (non_blocking, guard) = tracing_appender::non_blocking(file);
+
+    let layer = fmt::layer()
+        .with_writer(non_blocking)
+        .json() // Write logs in JSON format
+        .event_format(JsonFormatter)
+        .with_filter(EnvFilter::new(("rule_engine=trace")));
+
+    (layer, guard)
+}
+
+fn create_file_layer_human(
+    path: &str,
+    test_name: &str,
+) -> (impl Layer<Registry> + Send + Sync, WorkerGuard) {
+    let file = File::create(format!("{path}/{test_name}-generated-rule-trace-human.txt"))
+        .expect("Unable to create log file");
+    let (non_blocking, guard) = tracing_appender::non_blocking(file);
+
+    let layer = fmt::layer()
+        .with_writer(non_blocking)
+        .with_filter(EnvFilter::new(("rule_engine_human=trace")));
+
+    (layer, guard)
 }
 
 #[test]

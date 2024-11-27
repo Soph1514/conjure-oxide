@@ -450,5 +450,10 @@ fn trace_rules(results: &[RuleResult], expression: Expression) {
             expression,
             new_expression,
         );
+
+        trace!(
+            target: "rule_engine_human",
+            "hello"
+        );
     }
 }
