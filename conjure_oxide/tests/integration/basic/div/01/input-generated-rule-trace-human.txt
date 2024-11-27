@@ -1,0 +1,25 @@
+Initial Expression UnsafeDiv(a, b) 
+   Rule: div_to_bubble ([("Bubble", 6000)]) 
+Result: {SafeDiv(a, b) @ (b != 0)} 
+
+
+Initial Expression ({SafeDiv(a, b) @ (b != 0)} = 1) 
+   Rule: bubble_up ([("Bubble", 8900)]) 
+Result: {(SafeDiv(a, b) = 1) @ And([(b != 0)])} 
+
+
+Initial Expression {(SafeDiv(a, b) = 1) @ And([(b != 0)])} 
+   Rule: expand_bubble ([("Bubble", 8900)]) 
+Result: And([(SafeDiv(a, b) = 1), And([(b != 0)])]) 
+
+
+Initial Expression And([(SafeDiv(a, b) = 1), And([(b != 0)])]) 
+   Rule: unwrap_nested_and ([("Base", 8800)]) 
+Result: And([(SafeDiv(a, b) = 1), (b != 0)]) 
+
+
+Initial Expression (SafeDiv(a, b) = 1) 
+   Rule: introduce_diveq ([("Minion", 4200)]) 
+Result: DivEq(a, b, 1) 
+
+

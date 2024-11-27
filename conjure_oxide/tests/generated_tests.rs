@@ -13,8 +13,11 @@ use tracing::Subscriber;
 use tracing::{span, Level};
 use tracing_subscriber::layer::Layered;
 use tracing_subscriber::{
-    filter::EnvFilter, fmt, fmt::FmtContext, layer::SubscriberExt, Layer, Registry,
+    filter::EnvFilter, filter::FilterFn, fmt, fmt::FmtContext, layer::SubscriberExt, Layer,
+    Registry,
 };
+
+use tracing_subscriber::util::SubscriberInitExt;
 
 use tracing_appender::non_blocking::WorkerGuard;
 
@@ -54,11 +57,11 @@ struct TestConfig {
 }
 
 fn main() {
-    let _guard = create_scoped_subscriber("./logs", "test_log");
+    // let _guard = create_scoped_subscriber("./logs", "test_log");
 
-    // creating a span and log a message
-    let test_span = span!(Level::TRACE, "test_span");
-    let _enter: span::Entered<'_> = test_span.enter();
+    // // creating a span and log a message
+    // let test_span = span!(Level::TRACE, "test_span");
+    // let _enter: span::Entered<'_> = test_span.enter();
 
     for entry in glob("conjure_oxide/tests/integration/*").expect("Failed to read glob pattern") {
         match entry {
@@ -95,9 +98,12 @@ fn integration_test(path: &str, essence_base: &str, extension: &str) -> Result<(
 
     // set the subscriber as default
     tracing::subscriber::with_default(subscriber, || {
-        // create a span for the trace
-        let test_span = span!(target: "rule_engine", Level::TRACE, "test_span");
-        let _enter = test_span.enter();
+        // // create a span for the trace
+        // let test_span1 = span!(target: "rule_engine", Level::TRACE, "test_span");
+        // let _enter1 = test_span1.enter();
+
+        // let test_span2 = span!(target: "rule_engine_human", Level::TRACE, "test_span");
+        // let _enter2 = test_span2.enter();
 
         // execute tests based on verbosity
         if verbose {
@@ -390,24 +396,25 @@ where
 pub fn create_scoped_subscriber(
     path: &str,
     test_name: &str,
-) -> (impl tracing::Subscriber + Send + Sync, WorkerGuard) {
+) -> (
+    impl tracing::Subscriber + Send + Sync,
+    Vec<tracing_appender::non_blocking::WorkerGuard>,
+) {
     // let file = File::create(format!("{path}/{test_name}-generated-rule-trace.json"))
     //     .expect("Unable to create log file");
     // let writer = BufWriter::new(file);
-    //let (non_blocking, guard) = tracing_appender::non_blocking(writer);
+    // let (non_blocking, guard) = tracing_appender::non_blocking(writer);
 
     let (target1_layer, guard1) = create_file_layer_json(path, test_name);
     let (target2_layer, guard2) = create_file_layer_human(path, test_name);
     let layered = target1_layer.and_then(target2_layer);
 
-    // Wrap the subscriber in an Arc for thread safety
-    let subscriber =
-        Arc::new(Registry::default().with(layered)) as Arc<dyn tracing::Subscriber + Send + Sync>;
-
+    let subscriber = Arc::new(tracing_subscriber::registry().with(layered))
+        as Arc<dyn tracing::Subscriber + Send + Sync>;
     // setting this subscriber as the default
     let _default = tracing::subscriber::set_default(subscriber.clone());
 
-    (subscriber, guard1)
+    (subscriber, vec![guard1, guard2])
 }
 
 fn create_file_layer_json(
@@ -416,15 +423,18 @@ fn create_file_layer_json(
 ) -> (impl Layer<Registry> + Send + Sync, WorkerGuard) {
     let file = File::create(format!("{path}/{test_name}-generated-rule-trace.json"))
         .expect("Unable to create log file");
-    let (non_blocking, guard) = tracing_appender::non_blocking(file);
+    let (non_blocking, guard1) = tracing_appender::non_blocking(file);
 
-    let layer = fmt::layer()
+    let layer1 = fmt::layer()
         .with_writer(non_blocking)
         .json() // Write logs in JSON format
-        .event_format(JsonFormatter)
-        .with_filter(EnvFilter::new(("rule_engine=trace")));
+        .with_level(false)
+        .without_time()
+        .with_target(false)
+        .with_filter(EnvFilter::new("rule_engine=trace"))
+        .with_filter(FilterFn::new(|meta| meta.target() == "rule_engine"));
 
-    (layer, guard)
+    (layer1, guard1)
 }
 
 fn create_file_layer_human(
@@ -433,13 +443,17 @@ fn create_file_layer_human(
 ) -> (impl Layer<Registry> + Send + Sync, WorkerGuard) {
     let file = File::create(format!("{path}/{test_name}-generated-rule-trace-human.txt"))
         .expect("Unable to create log file");
-    let (non_blocking, guard) = tracing_appender::non_blocking(file);
+    let (non_blocking, guard2) = tracing_appender::non_blocking(file);
 
-    let layer = fmt::layer()
+    let layer2 = fmt::layer()
         .with_writer(non_blocking)
-        .with_filter(EnvFilter::new(("rule_engine_human=trace")));
+        .with_level(false)
+        .without_time()
+        .with_target(false)
+        .with_filter(EnvFilter::new(("rule_engine_human=trace")))
+        .with_filter(FilterFn::new(|meta| meta.target() == "rule_engine_human"));
 
-    (layer, guard)
+    (layer2, guard2)
 }
 
 #[test]

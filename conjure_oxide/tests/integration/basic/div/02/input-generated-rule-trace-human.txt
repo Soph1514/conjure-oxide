@@ -1,0 +1,10 @@
+Initial Expression (a >= UnsafeDiv(4, 2)) 
+   Rule: geq_to_ineq ([("Minion", 4100)]) 
+Result: Ineq(UnsafeDiv(4, 2), a, 0) 
+
+
+Initial Expression UnsafeDiv(4, 2) 
+   Rule: apply_eval_constant ([("Constant", 9001)]) 
+Result: 2 
+
+

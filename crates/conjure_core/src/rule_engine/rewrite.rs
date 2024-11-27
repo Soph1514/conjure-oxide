@@ -6,7 +6,7 @@ use thiserror::Error;
 
 use crate::bug;
 use crate::stats::RewriterStats;
-use tracing::trace;
+use tracing::{info, trace};
 use uniplate::Uniplate;
 
 use crate::rule_engine::{Reduction, Rule, RuleSet};
@@ -443,17 +443,21 @@ fn trace_rules(results: &[RuleResult], expression: Expression) {
         let new_expression = results[0].reduction.new_expression.clone();
 
         trace!(
+            target: "rule_engine_human",
+            "Initial Expression {} \n   Rule: {} ({:?}) \nResult: {} \n\n",
+            expression,
+            rule.name,
+            rule.rule_sets,
+            new_expression,
+        );
+
+        trace!(
             target: "rule_engine",
             "Rule applicable: {} ({:?}), to expression: {}, resulting in: {}",
             rule.name,
             rule.rule_sets,
             expression,
             new_expression,
-        );
-
-        trace!(
-            target: "rule_engine_human",
-            "hello"
         );
     }
 }
