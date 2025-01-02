@@ -146,17 +146,7 @@
 <a href="#145" id="145">145</a>
 <a href="#146" id="146">146</a>
 <a href="#147" id="147">147</a>
-<a href="#148" id="148">148</a>
-<a href="#149" id="149">149</a>
-<a href="#150" id="150">150</a>
-<a href="#151" id="151">151</a>
-<a href="#152" id="152">152</a>
-<a href="#153" id="153">153</a>
-<a href="#154" id="154">154</a>
-<a href="#155" id="155">155</a>
-<a href="#156" id="156">156</a>
-<a href="#157" id="157">157</a>
-<a href="#158" id="158">158</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::cell::RefCell;
+<a href="#148" id="148">148</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::cell::RefCell;
 <span class="kw">use </span>std::collections::HashSet;
 <span class="kw">use </span>std::fmt::Debug;
 <span class="kw">use </span>std::sync::{Arc, RwLock};
@@ -167,7 +157,6 @@
 
 <span class="kw">use </span><span class="kw">crate</span>::ast::{DecisionVariable, Domain, Expression, Name, SymbolTable};
 <span class="kw">use </span><span class="kw">crate</span>::context::Context;
-<span class="kw">use </span><span class="kw">crate</span>::metadata::Metadata;
 
 <span class="doccomment">/// Represents a computational model containing variables, constraints, and a shared context.
 ///
@@ -180,7 +169,7 @@
 ///   - For example, the name `x` might be linked to a `DecisionVariable` that says `x` can only take values between 1 and 10.
 ///
 /// - `constraints`:
-///   - Type: `Expression`
+///   - Type: `Vec&lt;Expression&gt;`
 ///   - Represents the logical constraints applied to the model's variables.
 ///   - Can be a single constraint or a combination of various expressions, such as logical operations (e.g., `AND`, `OR`),
 ///     arithmetic operations (e.g., `SafeDiv`, `UnsafeDiv`), or specialized constraints like `SumEq`.
@@ -205,7 +194,7 @@
 </span><span class="kw">pub struct </span>Model {
     <span class="attr">#[serde_as(<span class="kw">as </span>= <span class="string">"Vec&lt;(_, _)&gt;"</span>)]
     </span><span class="kw">pub </span>variables: SymbolTable,
-    <span class="kw">pub </span>constraints: Expression,
+    <span class="kw">pub </span>constraints: Vec&lt;Expression&gt;,
     <span class="attr">#[serde(skip)]
     #[derivative(PartialEq = <span class="string">"ignore"</span>)]
     </span><span class="kw">pub </span>context: Arc&lt;RwLock&lt;Context&lt;<span class="lifetime">'static</span>&gt;&gt;&gt;,
@@ -215,7 +204,7 @@
 <span class="kw">impl </span>Model {
     <span class="kw">pub fn </span>new(
         variables: SymbolTable,
-        constraints: Expression,
+        constraints: Vec&lt;Expression&gt;,
         context: Arc&lt;RwLock&lt;Context&lt;<span class="lifetime">'static</span>&gt;&gt;&gt;,
     ) -&gt; Model {
         Model {
@@ -227,11 +216,7 @@
     }
 
     <span class="kw">pub fn </span>new_empty(context: Arc&lt;RwLock&lt;Context&lt;<span class="lifetime">'static</span>&gt;&gt;&gt;) -&gt; Model {
-        Model::new(
-            Default::default(),
-            Expression::And(Metadata::new(), Vec::new()),
-            context,
-        )
+        Model::new(Default::default(), Vec::new(), context)
     }
     <span class="comment">// Function to update a DecisionVariable based on its Name
     </span><span class="kw">pub fn </span>update_domain(<span class="kw-2">&amp;mut </span><span class="self">self</span>, name: <span class="kw-2">&amp;</span>Name, new_domain: Domain) {
@@ -250,19 +235,14 @@
     }
 
     <span class="kw">pub fn </span>get_constraints_vec(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;Expression&gt; {
-        <span class="kw">match </span><span class="kw-2">&amp;</span><span class="self">self</span>.constraints {
-            Expression::And(<span class="kw">_</span>, constraints) =&gt; constraints.clone(),
-            <span class="kw">_ </span>=&gt; <span class="macro">vec!</span>[<span class="self">self</span>.constraints.clone()],
-        }
+        <span class="self">self</span>.constraints.clone()
     }
 
     <span class="kw">pub fn </span>set_constraints(<span class="kw-2">&amp;mut </span><span class="self">self</span>, constraints: Vec&lt;Expression&gt;) {
         <span class="kw">if </span>constraints.is_empty() {
-            <span class="self">self</span>.constraints = Expression::And(Metadata::new(), Vec::new());
-        } <span class="kw">else if </span>constraints.len() == <span class="number">1 </span>{
-            <span class="self">self</span>.constraints = constraints[<span class="number">0</span>].clone();
+            <span class="self">self</span>.constraints = Vec::new();
         } <span class="kw">else </span>{
-            <span class="self">self</span>.constraints = Expression::And(Metadata::new(), constraints);
+            <span class="self">self</span>.constraints = constraints;
         }
     }
 

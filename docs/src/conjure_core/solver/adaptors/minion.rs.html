@@ -425,7 +425,10 @@
 <a href="#424" id="424">424</a>
 <a href="#425" id="425">425</a>
 <a href="#426" id="426">426</a>
-<a href="#427" id="427">427</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+<a href="#427" id="427">427</a>
+<a href="#428" id="428">428</a>
+<a href="#429" id="429">429</a>
+<a href="#430" id="430">430</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
 <span class="kw">use </span>std::sync::{Mutex, OnceLock};
 
 <span class="kw">use </span>regex::Regex;
@@ -686,12 +689,10 @@
             <span class="comment">// top level false
             </span>Expr::Atomic(<span class="kw">_</span>, Atom::Literal(Bool(<span class="bool-val">false</span>))) =&gt; {
                 minion_model.constraints.push(minion_ast::Constraint::False);
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(());
             }
             <span class="comment">// top level true
             </span>Expr::Atomic(<span class="kw">_</span>, Atom::Literal(Bool(<span class="bool-val">true</span>))) =&gt; {
                 minion_model.constraints.push(minion_ast::Constraint::True);
-                <span class="kw">return </span><span class="prelude-val">Ok</span>(());
             }
 
             <span class="kw">_ </span>=&gt; {
@@ -780,6 +781,11 @@
                 read_var(<span class="kw-2">*</span>expr)<span class="question-mark">?</span>,
             ))
         }
+
+        conjure_ast::Expression::MinusEq(_metadata, a, b) =&gt; <span class="prelude-val">Ok</span>(minion_ast::Constraint::MinusEq(
+            read_var(conjure_ast::Expression::Atomic(_metadata.clone(), a))<span class="question-mark">?</span>,
+            read_var(conjure_ast::Expression::Atomic(_metadata, b))<span class="question-mark">?</span>,
+        )),
         x =&gt; <span class="prelude-val">Err</span>(ModelFeatureNotSupported(<span class="macro">format!</span>(<span class="string">"{:?}"</span>, x))),
     }
 }

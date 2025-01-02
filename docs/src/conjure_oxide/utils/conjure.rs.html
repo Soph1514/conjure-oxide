@@ -225,7 +225,7 @@
 <a href="#224" id="224">224</a>
 <a href="#225" id="225">225</a>
 <a href="#226" id="226">226</a>
-<a href="#227" id="227">227</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::HashMap;
+<a href="#227" id="227">227</a></pre></div><pre class="rust"><code><span class="kw">use </span>std::collections::BTreeMap;
 <span class="kw">use </span>std::io::Read;
 <span class="kw">use </span>std::path::Path;
 <span class="kw">use </span>std::string::ToString;
@@ -308,14 +308,14 @@
 <span class="kw">pub fn </span>get_minion_solutions(
     model: Model,
     num_sols: i32,
-) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;HashMap&lt;Name, Literal&gt;&gt;, anyhow::Error&gt; {
+) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;BTreeMap&lt;Name, Literal&gt;&gt;, anyhow::Error&gt; {
     <span class="kw">let </span>solver = Solver::new(Minion::new());
     <span class="macro">println!</span>(<span class="string">"Building Minion model..."</span>);
     <span class="kw">let </span>solver = solver.load_model(model)<span class="question-mark">?</span>;
 
     <span class="macro">println!</span>(<span class="string">"Running Minion..."</span>);
 
-    <span class="kw">let </span>all_solutions_ref = Arc::new(Mutex::&lt;Vec&lt;HashMap&lt;Name, Literal&gt;&gt;&gt;::new(<span class="macro">vec!</span>[]));
+    <span class="kw">let </span>all_solutions_ref = Arc::new(Mutex::&lt;Vec&lt;BTreeMap&lt;Name, Literal&gt;&gt;&gt;::new(<span class="macro">vec!</span>[]));
     <span class="kw">let </span>all_solutions_ref_2 = all_solutions_ref.clone();
     <span class="kw">let </span>solver = <span class="kw">if </span>num_sols &gt; <span class="number">0 </span>{
         <span class="kw">let </span>sols_left = Mutex::new(num_sols);
@@ -324,7 +324,7 @@
         </span>solver
             .solve(Box::new(<span class="kw">move </span>|sols| {
                 <span class="kw">let </span><span class="kw-2">mut </span>all_solutions = (<span class="kw-2">*</span>all_solutions_ref_2).lock().unwrap();
-                (<span class="kw-2">*</span>all_solutions).push(sols);
+                (<span class="kw-2">*</span>all_solutions).push(sols.into_iter().collect());
                 <span class="kw">let </span><span class="kw-2">mut </span>sols_left = sols_left.lock().unwrap();
                 <span class="kw-2">*</span>sols_left -= <span class="number">1</span>;
 
@@ -336,7 +336,7 @@
         </span>solver
             .solve(Box::new(<span class="kw">move </span>|sols| {
                 <span class="kw">let </span><span class="kw-2">mut </span>all_solutions = (<span class="kw-2">*</span>all_solutions_ref_2).lock().unwrap();
-                (<span class="kw-2">*</span>all_solutions).push(sols);
+                (<span class="kw-2">*</span>all_solutions).push(sols.into_iter().collect());
                 <span class="bool-val">true
             </span>}))
             .unwrap()
@@ -353,7 +353,7 @@
 <span class="attr">#[allow(clippy::unwrap_used)]
 </span><span class="kw">pub fn </span>get_solutions_from_conjure(
     essence_file: <span class="kw-2">&amp;</span>str,
-) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;HashMap&lt;Name, Literal&gt;&gt;, EssenceParseError&gt; {
+) -&gt; <span class="prelude-ty">Result</span>&lt;Vec&lt;BTreeMap&lt;Name, Literal&gt;&gt;, EssenceParseError&gt; {
     <span class="comment">// this is ran in parallel, and we have no guarantee by rust that invocations to this function
     // don't share the same tmp dir.
     </span><span class="kw">let </span><span class="kw-2">mut </span>rng = rand::thread_rng();
@@ -407,10 +407,10 @@
             <span class="string">"expected solutions to be an array"</span>.to_owned(),
         ))<span class="question-mark">?</span>;
 
-    <span class="kw">let </span><span class="kw-2">mut </span>solutions_set: Vec&lt;HashMap&lt;Name, Literal&gt;&gt; = Vec::new();
+    <span class="kw">let </span><span class="kw-2">mut </span>solutions_set: Vec&lt;BTreeMap&lt;Name, Literal&gt;&gt; = Vec::new();
 
     <span class="kw">for </span>solution <span class="kw">in </span>solutions {
-        <span class="kw">let </span><span class="kw-2">mut </span>solution_map = HashMap::new();
+        <span class="kw">let </span><span class="kw-2">mut </span>solution_map = BTreeMap::new();
         <span class="kw">let </span>solution = solution
             .as_object()
             .ok_or(EssenceParseError::ConjureSolutionsError(
@@ -436,7 +436,7 @@
     <span class="prelude-val">Ok</span>(solutions_set)
 }
 
-<span class="kw">pub fn </span>minion_solutions_to_json(solutions: <span class="kw-2">&amp;</span>Vec&lt;HashMap&lt;Name, Literal&gt;&gt;) -&gt; JsonValue {
+<span class="kw">pub fn </span>minion_solutions_to_json(solutions: <span class="kw-2">&amp;</span>Vec&lt;BTreeMap&lt;Name, Literal&gt;&gt;) -&gt; JsonValue {
     <span class="kw">let </span><span class="kw-2">mut </span>json_solutions = Vec::new();
     <span class="kw">for </span>solution <span class="kw">in </span>solutions {
         <span class="kw">let </span><span class="kw-2">mut </span>json_solution = Map::new();
