@@ -780,7 +780,7 @@
             </div>
             <div class="column has-background-success-light p-0"
                  role="cell">
-                <pre class="has-background-success-light py-0 px-2">&#x2F;&#x2F;&#x2F;     cmds.mut_meta(|m| *m += 1);</pre>
+                <pre class="has-background-success-light py-0 px-2">&#x2F;&#x2F;&#x2F;     cmds.mut_meta(Box::new(|m: &amp;mut i32| *m += 1));</pre>
             </div>
         </div><div class="columns p-0 m-0" role="row">
             <div
@@ -1004,7 +1004,7 @@
             </div>
             <div class="column has-background-success-light p-0"
                  role="cell">
-                <pre class="has-background-success-light py-0 px-2">&#x2F;&#x2F;&#x2F;     cmds.mut_meta(|m| *m += 1);</pre>
+                <pre class="has-background-success-light py-0 px-2">&#x2F;&#x2F;&#x2F;     cmds.mut_meta(Box::new(|m: &amp;mut i32| *m += 1));</pre>
             </div>
         </div><div class="columns p-0 m-0" role="row">
             <div
@@ -2610,7 +2610,7 @@
 </div>
         <footer class="footer">
             <div class="content has-text-centered">
-                <p class="heading">Date: 2025-03-08 15:42</p>
+                <p class="heading">Date: 2025-03-11 17:07</p>
             </div>
         </footer>
     </body>

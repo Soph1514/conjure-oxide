@@ -108,7 +108,7 @@
             </div>
             <div class="column has-background-white p-0"
                  role="cell">
-                <pre class="has-background-white py-0 px-2">    Transform(fn(T) -&gt; T),</pre>
+                <pre class="has-background-white py-0 px-2">    Transform(Box&lt;dyn FnOnce(T) -&gt; T&gt;),</pre>
             </div>
         </div><div class="columns p-0 m-0" role="row">
             <div
@@ -124,7 +124,7 @@
             </div>
             <div class="column has-background-white p-0"
                  role="cell">
-                <pre class="has-background-white py-0 px-2">    MutMeta(fn(&amp;mut M)),</pre>
+                <pre class="has-background-white py-0 px-2">    MutMeta(Box&lt;dyn FnOnce(&amp;mut M)&gt;),</pre>
             </div>
         </div><div class="columns p-0 m-0" role="row">
             <div
@@ -684,7 +684,7 @@
             </div>
             <div class="column has-background-success-light p-0"
                  role="cell">
-                <pre class="has-background-success-light py-0 px-2">&#x2F;&#x2F;&#x2F;     cmds.transform(|t| match t { &#x2F;&#x2F; A pure transformation (no other side-effects)</pre>
+                <pre class="has-background-success-light py-0 px-2">&#x2F;&#x2F;&#x2F;     cmds.transform(Box::new(|t| match t { &#x2F;&#x2F; A pure transformation (no other side-effects)</pre>
             </div>
         </div><div class="columns p-0 m-0" role="row">
             <div
@@ -732,7 +732,7 @@
             </div>
             <div class="column has-background-danger-light p-0"
                  role="cell">
-                <pre class="has-background-danger-light py-0 px-2">&#x2F;&#x2F;&#x2F;     });</pre>
+                <pre class="has-background-danger-light py-0 px-2">&#x2F;&#x2F;&#x2F;     }));</pre>
             </div>
         </div><div class="columns p-0 m-0" role="row">
             <div
@@ -748,7 +748,7 @@
             </div>
             <div class="column has-background-success-light p-0"
                  role="cell">
-                <pre class="has-background-success-light py-0 px-2">&#x2F;&#x2F;&#x2F;     cmds.mut_meta(|m| *m = true); &#x2F;&#x2F; Set the metadata to &#x27;true&#x27;</pre>
+                <pre class="has-background-success-light py-0 px-2">&#x2F;&#x2F;&#x2F;     cmds.mut_meta(Box::new(|m: &amp;mut bool| *m = true)); &#x2F;&#x2F; Set the metadata to &#x27;true&#x27;</pre>
             </div>
         </div><div class="columns p-0 m-0" role="row">
             <div
@@ -1292,7 +1292,7 @@
             </div>
             <div class="column has-background-success-light p-0"
                  role="cell">
-                <pre class="has-background-success-light py-0 px-2">    pub fn transform(&amp;mut self, f: fn(T) -&gt; T) {</pre>
+                <pre class="has-background-success-light py-0 px-2">    pub fn transform(&amp;mut self, f: Box&lt;dyn FnOnce(T) -&gt; T&gt;) {</pre>
             </div>
         </div><div class="columns p-0 m-0" role="row">
             <div
@@ -1404,7 +1404,7 @@
             </div>
             <div class="column has-background-success-light p-0"
                  role="cell">
-                <pre class="has-background-success-light py-0 px-2">    pub fn mut_meta(&amp;mut self, f: fn(&amp;mut M)) {</pre>
+                <pre class="has-background-success-light py-0 px-2">    pub fn mut_meta(&amp;mut self, f: Box&lt;dyn FnOnce(&amp;mut M)&gt;) {</pre>
             </div>
         </div><div class="columns p-0 m-0" role="row">
             <div
@@ -1714,7 +1714,7 @@
 </div>
         <footer class="footer">
             <div class="content has-text-centered">
-                <p class="heading">Date: 2025-03-08 15:42</p>
+                <p class="heading">Date: 2025-03-11 17:07</p>
             </div>
         </footer>
     </body>
