@@ -32,7 +32,7 @@ function.</p>
 <span class="comment">// Define and rewrite a model for minion.
 </span><span class="kw">let </span>model = get_example_model(<span class="string">"bool-03"</span>).unwrap();
 <span class="kw">let </span>rule_sets = resolve_rule_sets(SolverFamily::Minion, <span class="kw-2">&amp;</span><span class="macro">vec!</span>[<span class="string">"Constant"</span>]).unwrap();
-<span class="kw">let </span>model = rewrite_naive(<span class="kw-2">&amp;</span>model, <span class="kw-2">&amp;</span>rule_sets, <span class="bool-val">true</span>).unwrap();
+<span class="kw">let </span>model = rewrite_naive(<span class="kw-2">&amp;</span>model, <span class="kw-2">&amp;</span>rule_sets, <span class="bool-val">true</span>, <span class="prelude-val">None</span>).unwrap();
 
 
 <span class="comment">// Solve using Minion.

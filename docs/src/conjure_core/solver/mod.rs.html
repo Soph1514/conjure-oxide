@@ -33,7 +33,7 @@
 <a href=#33 id=33 data-nosnippet>33</a>//! // Define and rewrite a model for minion.
 <a href=#34 id=34 data-nosnippet>34</a>//! let model = get_example_model("bool-03").unwrap();
 <a href=#35 id=35 data-nosnippet>35</a>//! let rule_sets = resolve_rule_sets(SolverFamily::Minion, &amp;vec!["Constant"]).unwrap();
-<a href=#36 id=36 data-nosnippet>36</a>//! let model = rewrite_naive(&amp;model, &amp;rule_sets, true).unwrap();
+<a href=#36 id=36 data-nosnippet>36</a>//! let model = rewrite_naive(&amp;model, &amp;rule_sets, true, None).unwrap();
 <a href=#37 id=37 data-nosnippet>37</a>//!
 <a href=#38 id=38 data-nosnippet>38</a>//!
 <a href=#39 id=39 data-nosnippet>39</a>//! // Solve using Minion.
