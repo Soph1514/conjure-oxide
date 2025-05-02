@@ -252,6 +252,7 @@ pub struct BothConsumer {
 impl Trace for StdoutConsumer {
     fn capture(&self, trace: TraceType) {
         let formatted_output = self.formatter.format(trace);
+        // if rule does not match filter, it will not be outputted
         if formatted_output == String::new() {
             return;
         }
@@ -283,6 +284,12 @@ impl Trace for FileConsumer {
             FormatterType::Human => {
                 if let Some(ref human_path) = self.human_file_path {
                     let formatted_output = self.formatter.format(trace.clone());
+
+                    // if rule does not match filter, it will not be outputted
+                    if formatted_output == String::new() {
+                        return;
+                    }
+
                     let mut human_file = OpenOptions::new()
                         .append(true)
                         .create(true)
@@ -703,5 +710,32 @@ mod tests {
             output_file3.1.unwrap_or_default(),
             "example_essence_trace.txt"
         );
+    }
+
+    #[test]
+    fn test_set_get_kind_filter() {
+        set_kind_filter(Some(Kind::Parser));
+        assert_eq!(get_kind_filter().unwrap(), Kind::Parser);
+    }
+
+    #[test]
+    fn test_set_get_rule_filter() {
+        let rule_filter = vec![
+            "normalise_associative_commutative".to_string(),
+            "partial_evaluator".to_string(),
+        ];
+        set_rule_filter(Some(rule_filter.clone()));
+        assert_eq!(get_rule_filter().unwrap(), rule_filter);
+    }
+
+    #[test]
+    fn test_set_get_rule_set_filter() {
+        let rule_set_filter = vec![
+            "Base".to_string(),
+            "Minion".to_string(),
+            "Bubble".to_string(),
+        ];
+        set_rule_filter(Some(rule_set_filter.clone()));
+        assert_eq!(get_rule_filter().unwrap(), rule_set_filter);
     }
 }
