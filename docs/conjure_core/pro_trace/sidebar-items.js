@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Consumer","TraceStruct","VerbosityLevel"],"fn":["capture_trace","check_verbosity_level","create_consumer","specify_trace_file"],"struct":["FileConsumer","HumanFormatter","JsonFormatter","RuleTrace","StdoutConsumer"],"trait":["MessageFormatter","Trace"]};

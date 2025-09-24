@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":["get_from_table","run_minion"],"mod":["ast","error"],"type":["Callback"]};
